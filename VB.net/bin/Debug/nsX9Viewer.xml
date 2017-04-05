@@ -1,0 +1,24 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+nsX9Viewer
+</name>
+</assembly>
+<members>
+<member name="M:nsX9Viewer.frmViewer.JoinTiffImages(System.Collections.ArrayList,System.String,System.Drawing.Imaging.EncoderValue)">
+	<summary>
+ This function will join the TIFF file with a specific compression format
+ </summary>
+	<param name="imageFiles">array list with source image files</param>
+	<param name="outFile">target TIFF file to be produced</param>
+	<param name="compressEncoder">compression codec enum</param>
+</member><member name="M:nsX9Viewer.frmViewer.GetEncoderInfo(System.String)">
+	<summary>
+ Getting the supported codec info.
+ </summary>
+	<param name="mimeType">description of mime type</param>
+	<returns>image codec info</returns>
+</member>
+</members>
+</doc>

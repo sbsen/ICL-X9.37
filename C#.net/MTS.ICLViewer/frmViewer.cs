@@ -128,6 +128,8 @@ namespace MTS.ICLViewer
             bool checkFront52 = false;
             bool checkBack50 = false;
             bool checkBack52 = false;
+            bool useEbcidic = false;
+            bool first = true;
             fileStarted = false; // Flag for header
             fileEnded = false; // flag for footer
             clStarted = false; // flag for cash letter header
@@ -161,7 +163,17 @@ namespace MTS.ICLViewer
                     lblLoad.Text = (readSize / 1024.0).ToString("###,###,###,###") + " KB of " + (fileSize / 1024.0).ToString("###,###,###,###") + " KB";
                     Application.DoEvents();
                 }
-                //rec = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB));
+                if (first)
+                {
+                    string asAscii = Encoding.ASCII.GetString(recB);
+                    string asEbcidic = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB));
+                    //if (Regex.IsMatch(asAscii, @"^[a-zA-Z 0-9]+$")) useEbcidic = false;
+                    useEbcidic = asEbcidic.Replace(" ", "").All(Char.IsLetterOrDigit);
+                    first = false;
+                }
+                if (useEbcidic) rec = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB));
+                else rec = Encoding.ASCII.GetString(recB);
+
                 rec = Encoding.ASCII.GetString(recB);
                 fileRecCount += 1;
                 switch (rec.Substring(0, 2))
@@ -356,14 +368,17 @@ namespace MTS.ICLViewer
                     case "52":
                         curPos -= reclen;
                         // read first 105 characters
-                        rec = Encoding.ASCII.GetString(recB, 0, 105);
+                        if (useEbcidic) rec = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB),0,105);
+                        else rec = Encoding.ASCII.GetString(recB, 0, 105);
                         // get length of image reference key 102-105
                         refKeyLen = int.Parse(rec.Substring(101));
                         // read image ref key and digital sig length
-                        rec = Encoding.ASCII.GetString(recB, 0, 105 + refKeyLen + 5);
+                        if (useEbcidic) rec = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB), 0, 105 + refKeyLen + 5);
+                        else rec = Encoding.ASCII.GetString(recB, 0, 105 + refKeyLen + 5);
                         sigLen = int.Parse(rec.Substring(105 + refKeyLen));
                         // read everything except image
-                        rec = Encoding.ASCII.GetString(recB, 0, 105 + refKeyLen + 5 + sigLen + 7);
+                        if (useEbcidic) rec = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB), 0, 105 + refKeyLen + 5 + sigLen + 7);
+                        else rec = Encoding.ASCII.GetString(recB, 0, 105 + refKeyLen + 5 + sigLen + 7);
                         curPos += 105 + refKeyLen + 5 + sigLen + 7;
                         imgLen = int.Parse(rec.Substring(rec.Length - 7));
                         byte[] outArr = new byte[recB.GetUpperBound(0) - rec.Length + 1];

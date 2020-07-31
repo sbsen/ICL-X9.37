@@ -165,14 +165,20 @@ namespace MTS.ICLViewer
                 }
                 if (first)
                 {
-                    string asAscii = Encoding.ASCII.GetString(recB);
+                    //string asAscii = Encoding.ASCII.GetString(recB);
                     string asEbcidic = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB));
                     //if (Regex.IsMatch(asAscii, @"^[a-zA-Z 0-9]+$")) useEbcidic = false;
                     useEbcidic = asEbcidic.Replace(" ", "").All(Char.IsLetterOrDigit);
                     first = false;
                 }
-                if (useEbcidic) rec = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB));
-                else rec = Encoding.ASCII.GetString(recB);
+                if (useEbcidic)
+                {
+                    rec = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB));
+                }
+                else
+                {
+                    rec = Encoding.ASCII.GetString(recB);
+                }
 
                 rec = Encoding.ASCII.GetString(recB);
                 fileRecCount += 1;
@@ -368,22 +374,40 @@ namespace MTS.ICLViewer
                     case "52":
                         curPos -= reclen;
                         // read first 105 characters
-                        if (useEbcidic) rec = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB),0,105);
-                        else rec = Encoding.ASCII.GetString(recB, 0, 105);
+                        if (useEbcidic)
+                        {
+                            rec = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB), 0, 105);
+                        }
+                        else
+                        {
+                            rec = Encoding.ASCII.GetString(recB, 0, 105);
+                        }
                         // get length of image reference key 102-105
                         refKeyLen = int.Parse(rec.Substring(101));
                         // read image ref key and digital sig length
-                        if (useEbcidic) rec = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB), 0, 105 + refKeyLen + 5);
-                        else rec = Encoding.ASCII.GetString(recB, 0, 105 + refKeyLen + 5);
+                        if (useEbcidic)
+                        {
+                            rec = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB), 0, 105 + refKeyLen + 5);
+                        }
+                        else
+                        {
+                            rec = Encoding.ASCII.GetString(recB, 0, 105 + refKeyLen + 5);
+                        }
                         sigLen = int.Parse(rec.Substring(105 + refKeyLen));
                         // read everything except image
-                        if (useEbcidic) rec = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB), 0, 105 + refKeyLen + 5 + sigLen + 7);
-                        else rec = Encoding.ASCII.GetString(recB, 0, 105 + refKeyLen + 5 + sigLen + 7);
+                        if (useEbcidic)
+                        {
+                            rec = Encoding.ASCII.GetString(Encoding.Convert(Encoding.GetEncoding(37), Encoding.GetEncoding("ASCII"), recB), 0, 105 + refKeyLen + 5 + sigLen + 7);
+                        }
+                        else
+                        {
+                            rec = Encoding.ASCII.GetString(recB, 0, 105 + refKeyLen + 5 + sigLen + 7);
+                        }
                         curPos += 105 + refKeyLen + 5 + sigLen + 7;
                         imgLen = int.Parse(rec.Substring(rec.Length - 7));
                         byte[] outArr = new byte[recB.GetUpperBound(0) - rec.Length + 1];
                         Array.Copy(recB, rec.Length, outArr, 0, recB.Length - rec.Length);
-                        
+
                         if (checkStarted)
                         {
                             if (checkFront52)
@@ -578,7 +602,7 @@ namespace MTS.ICLViewer
             exporting.Show();
             this.Cursor = Cursors.WaitCursor;
             int reccnt = 0;
-                       
+
             try
             {
                 foreach (x9Rec rec in x9Stuff)
@@ -590,7 +614,7 @@ namespace MTS.ICLViewer
                         checkImageBR.BaseStream.Seek(startPos, SeekOrigin.Begin);
                         recB = new byte[imgLen + 1];
                         recB = checkImageBR.ReadBytes(imgLen);
-                        Byte2Image(ref cImg, recB, 0);                       
+                        Byte2Image(ref cImg, recB, 0);
                         if (frame == 0)
                         {
                             pages = (Bitmap)cImg;
@@ -655,7 +679,7 @@ namespace MTS.ICLViewer
             exporting.Show();
             this.Cursor = Cursors.WaitCursor;
             int reccnt = 0;
-          
+
             try
             {
                 foreach (x9Rec rec in x9Stuff)
@@ -672,7 +696,7 @@ namespace MTS.ICLViewer
                         checkImageBR.BaseStream.Seek(startPos, SeekOrigin.Begin);
                         recB = new byte[imgLen + 1];
                         recB = checkImageBR.ReadBytes(imgLen);
-                        Byte2Image(ref cImg, recB, 0);                      
+                        Byte2Image(ref cImg, recB, 0);
                         if (frame == 0)
                         {
                             pages = (Bitmap)cImg;
@@ -694,7 +718,7 @@ namespace MTS.ICLViewer
                     exporting.pbCleanup.Value = (int)(reccnt / (double)x9Stuff.Count) * 100;
                     Application.DoEvents();
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -706,7 +730,7 @@ namespace MTS.ICLViewer
             {
                 ep.Param[0] = new EncoderParameter(enc, System.Convert.ToInt64(EncoderValue.Flush));
                 pages.SaveAdd(ep);
-            }            
+            }
             exporting.Close();
             this.Cursor = Cursors.Default;
         }
@@ -1065,7 +1089,7 @@ namespace MTS.ICLViewer
                 }
             }
         }
-         
+
 
         private void ExportImagesToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
